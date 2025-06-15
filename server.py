@@ -18,3 +18,20 @@ def handle_client(addr, filename, server_port):
 
         data_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         data_socket.bind(('', transfer_port))
+        with open(filepath, "rb") as f:
+            received = set()
+            while True:
+                req, client = data_socket.recvfrom(2048)
+                msg = req.decode()
+                if msg.startswith(f"FILE {filename} GET"):
+                    parts = msg.split()
+                    start = int(parts[5])
+                    end = int(parts[7])
+                    if (start, end) in received:
+                        continue
+                    f.seek(start)
+                    chunk = f.read(end - start + 1)
+                    encoded = base64.b64encode(chunk).decode()
+                    reply = f"FILE {filename} OK START {start} END {end} DATA {encoded}"
+                    data_socket.sendto(reply.encode(), client)
+                    received.add((start, end))
