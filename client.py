@@ -29,3 +29,14 @@ def download_file(filename, sock, server_addr):
         size = int(parts[3])
         port = int(parts[5])
         print(f"[Client] Downloading '{filename}' ({size} bytes) from port {port}")
+        # Create new socket for data transfer
+        data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        start = 0
+
+        os.makedirs("client_files", exist_ok=True)
+        local_path = os.path.join("client_files", filename)
+
+        with open(local_path, "wb") as f:
+            while start < size:
+                end = min(start + CHUNK_SIZE - 1, size - 1)
+                request = f"FILE {filename} GET START {start} END {end}"
