@@ -63,3 +63,15 @@ def download_file(filename, sock, server_addr):
         print(f"\n[Client] Downloaded {filename}")
     except TimeoutError:
         print(f"[Client] Failed to download {filename}")
+if __name__ == "__main__":
+    host = sys.argv[1]
+    port = int(sys.argv[2])
+    filelist = sys.argv[3]
+    os.makedirs("client_files", exist_ok=True)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server_addr = (host, port)
+
+    with open(filelist) as f:
+        for line in f:
+            download_file(line.strip(), sock, server_addr)
