@@ -41,3 +41,14 @@ def handle_client(addr, filename, server_port):
         data_socket.close()
     except Exception as e:
         print(f"[Error] {e}")
+if __name__ == "__main__":
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    port = int(sys.argv[1])
+    server.bind(('', port))
+    print(f"Server listening on port {port}...")
+    while True:
+        msg, addr = server.recvfrom(1024)
+        msg = msg.decode()
+        if msg.startswith("DOWNLOAD"):
+            filename = msg.split()[1]
+            threading.Thread(target=handle_client, args=(addr, filename, port)).start()
