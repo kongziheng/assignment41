@@ -56,3 +56,10 @@ def download_file(filename, sock, server_addr):
                     except socket.timeout:
                         continue
                 start = end + 1
+            # Send close
+            close_msg = f"FILE {filename} CLOSE"
+            data_sock.sendto(close_msg.encode(), (server_addr[0], port))
+            data_sock.recvfrom(1024)
+        print(f"\n[Client] Downloaded {filename}")
+    except TimeoutError:
+        print(f"[Client] Failed to download {filename}")
