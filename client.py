@@ -16,3 +16,16 @@ def send_and_receive(sock, message, server_addr, timeout=1):
             print(f"[Retry] No response. Retrying {i+1}/{MAX_RETRIES}...")
             timeout *= 2
     raise TimeoutError("Max retries reached")
+def download_file(filename, sock, server_addr):
+    try:
+        # Send DOWNLOAD request
+        resp, _ = send_and_receive(sock, f"DOWNLOAD {filename}", server_addr)
+        parts = resp.decode().split()
+
+        if parts[0] == "ERR":
+            print(f"[Client] File {filename} not found on server.")
+            return
+
+        size = int(parts[3])
+        port = int(parts[5])
+        print(f"[Client] Downloading '{filename}' ({size} bytes) from port {port}")
