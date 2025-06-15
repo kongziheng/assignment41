@@ -40,3 +40,19 @@ def download_file(filename, sock, server_addr):
             while start < size:
                 end = min(start + CHUNK_SIZE - 1, size - 1)
                 request = f"FILE {filename} GET START {start} END {end}"
+                data_sock.settimeout(1)
+                for attempt in range(MAX_RETRIES):
+                    try:
+                        data_sock.sendto(request.encode(), (server_addr[0], port))
+                        data, _ = data_sock.recvfrom(65536)
+                        decoded = data.decode()
+                        if decoded.startswith("FILE") and "DATA" in decoded:
+                            encoded_data = decoded.split("DATA ")[1]
+                            chunk = base64.b64decode(encoded_data)
+                            f.seek(start)
+                            f.write(chunk)
+                            print("*", end="", flush=True)
+                            break
+                    except socket.timeout:
+                        continue
+                start = end + 1
