@@ -35,3 +35,9 @@ def handle_client(addr, filename, server_port):
                     reply = f"FILE {filename} OK START {start} END {end} DATA {encoded}"
                     data_socket.sendto(reply.encode(), client)
                     received.add((start, end))
+                elif msg.strip() == f"FILE {filename} CLOSE":
+                    data_socket.sendto(f"FILE {filename} CLOSE_OK".encode(), client)
+                    break
+        data_socket.close()
+    except Exception as e:
+        print(f"[Error] {e}")
